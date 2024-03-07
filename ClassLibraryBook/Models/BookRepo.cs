@@ -13,10 +13,11 @@ namespace BooksClassLibrary.Models
     public class BookRepo
     {
         private GenericRepo repo = new GenericRepo();
-        public int AddBookReturnId(Book book)
+        public void AddBookReturnId(Book book)
         {
-            string sql = "INSERT INTO Book(Title, Author, Price, describe, CountryID)" + 
-                            "VALUES(@Title, @AUthor, @Price, @Describe, @CountryId)" +
+            #region Without Generic Repo
+            /*string sql = "INSERT INTO Book(Title, Author, Price, describe, CountryID)" + 
+            "VALUES(@Title, @AUthor, @Price, @Describe, @CountryId)" +
                             "Select Cast(SCOPE_IDENTITY()as int) ";
 
             using (IDbConnection connection = new SqlConnection(Helper.ConStr("Books")))
@@ -24,7 +25,14 @@ namespace BooksClassLibrary.Models
                 var returnId = connection.Query<int>(sql, book).SingleOrDefault();
                 //book.Id = returnId
                 return returnId;
-            }
+            }*/
+            #endregion
+
+            string sql = "INSERT INTO Book(Title, Author, Price, describe, CountryID)" +
+            "VALUES(@Title, @AUthor, @Price, @Describe, @CountryId)" +
+                            "Select Cast(SCOPE_IDENTITY()as int) ";
+            
+            repo.SaveData(sql, new { book.Title,book.Author, book.Price, book.Describe, book.CountryId} );
         }
 
         public List<Book> GetAllBooks() 
@@ -47,14 +55,27 @@ namespace BooksClassLibrary.Models
             {
                 connection.Execute("Delete from Book where Id = @id", new {Id = id });                
             }
+        
+
+        //With GenericRepo:
+            using (IDbConnection connection = new SqlConnection(Helper.ConStr("Books")))
+            {
+                var sql = "Delete from Book where Id = @Id";
+                repo.SaveData(sql,new { Id = id });
+
+            }
         }
+
+
+
 
         public void UpdateBook(Book book)
         {
             using (IDbConnection connection = new SqlConnection(Helper.ConStr("Books")))
             {
-                connection.Execute("Update book SET Title = @Title," +
-                     "Author = @Author, Price = @Price, Describe = @Describe," +
+                #region Without Generic Repo
+                /*connection.Execute("Update book SET Title = @Title," +
+                "Author = @Author, Price = @Price, Describe = @Describe," +
                      "CountryId = @CountryId  WHERE Id = @id",
                      new
                      {
@@ -64,9 +85,21 @@ namespace BooksClassLibrary.Models
                         Describe = book.Describe,
                         CountryId = book.CountryId,
                         Id = book.Id
-                     });
-                               
+                     });*/
+                #endregion
             }
+            //With Generic repo
+            var sql = "Update book SET Title = @Title," +
+                "Author = @Author, Price = @Price, Describe = @Describe," +
+                     "CountryId = @CountryId  WHERE Id = @id";
+            repo.SaveData(sql, new {
+                Title = book.Title,
+                Author = book.Author,
+                Price = book.Price,
+                Describe = book.Describe,
+                CountryId = book.CountryId,
+                Id = book.Id
+            });
         }
     }
 }

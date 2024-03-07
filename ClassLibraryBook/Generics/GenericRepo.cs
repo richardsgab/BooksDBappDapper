@@ -23,7 +23,7 @@ namespace ClassLibraryBook.Generics
         }
 
         //read and Write
-        public void SaveData<T, U>(string sqlstatement, U parameters)
+        public void SaveData<T>(string sqlstatement, T parameters)
         {
             using (IDbConnection connection = new SqlConnection(Helper.ConStr("Books")))
             {
@@ -31,5 +31,7 @@ namespace ClassLibraryBook.Generics
                 
             }
         }
+
+       
     }
 }
